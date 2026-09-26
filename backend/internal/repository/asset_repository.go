@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/assethub/assethub/internal/constants"
 	"github.com/assethub/assethub/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -83,6 +84,29 @@ func (r *AssetRepository) Count(ctx context.Context, filter bson.M) (int64, erro
 		return 0, fmt.Errorf("count assets: %w", err)
 	}
 	return n, nil
+}
+
+// ListPublishedByIDs returns only the published assets among the given ids.
+// Draft, archived and flagged assets are filtered out at the database level so
+// their fields never leave the repository.
+func (r *AssetRepository) ListPublishedByIDs(ctx context.Context, ids []primitive.ObjectID) ([]model.Asset, error) {
+	if len(ids) == 0 {
+		return []model.Asset{}, nil
+	}
+	filter := bson.M{
+		"_id":    bson.M{"$in": ids},
+		"status": string(constants.AssetStatusPublished),
+	}
+	cursor, err := r.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("list published assets by ids: %w", err)
+	}
+	defer cursor.Close(ctx)
+	var assets []model.Asset
+	if err := cursor.All(ctx, &assets); err != nil {
+		return nil, fmt.Errorf("decode assets: %w", err)
+	}
+	return assets, nil
 }
 
 // IncViewCount increments the view counter of an asset.

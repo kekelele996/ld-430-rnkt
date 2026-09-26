@@ -17,4 +17,5 @@ const (
 	MsgDownloadSuccess     = "download success"
 	MsgReviewSuccess       = "review submitted"
 	MsgCommercialForbidden = "commercial license assets require extra permission"
+	MsgShareLinkInvalid    = "share link is invalid, expired or revoked"
 )

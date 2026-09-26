@@ -22,6 +22,9 @@
     "/collections/{id}/assets": { "post": { "summary": "添加素材", "tags": ["collection"] } },
     "/collections/{id}/assets/{assetId}": { "delete": { "summary": "移除素材", "tags": ["collection"] } },
     "/collections/{id}/members": { "post": { "summary": "添加协作成员", "tags": ["collection"] } },
+    "/collections/{id}/share-links": { "post": { "summary": "创建分享链接（所有者，带过期时间）", "tags": ["share"] }, "get": { "summary": "分享链接列表（所有者）", "tags": ["share"] } },
+    "/collections/{id}/share-links/{linkId}": { "delete": { "summary": "撤回分享链接（所有者）", "tags": ["share"] } },
+    "/shared/{token}": { "get": { "summary": "访客免登录查看分享的收藏夹（仅已发布素材；过期/撤回返回 403）", "tags": ["share"] } },
     "/downloads": { "get": { "summary": "下载记录", "tags": ["download"] } },
     "/audit-logs": { "get": { "summary": "审计日志 (Admin)", "tags": ["audit"] } }
   },
