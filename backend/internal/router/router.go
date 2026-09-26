@@ -21,6 +21,7 @@ type Handlers struct {
 	Asset      *handler.AssetHandler
 	Category   *handler.CategoryHandler
 	Collection *handler.CollectionHandler
+	Share      *handler.ShareHandler
 	Download   *handler.DownloadHandler
 	Tag        *handler.TagHandler
 	Review     *handler.ReviewHandler
@@ -72,6 +73,7 @@ func registerAPI(api *gin.RouterGroup, h Handlers, cfg *config.Config, jwtManage
 	registerAsset(api, h, cfg, jwtManager, rateLimiter)
 	registerCategory(api, h, jwtManager)
 	registerCollection(api, h, jwtManager)
+	registerShare(api, h, jwtManager)
 	registerDownload(api, h, cfg, jwtManager, rateLimiter)
 	registerTag(api, h, jwtManager)
 	registerReview(api, h, jwtManager)

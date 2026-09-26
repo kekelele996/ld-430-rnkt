@@ -65,6 +65,15 @@ const (
 	TagCategoryOther     TagCategory = "Other"
 )
 
+// ShareLinkStatus describes the lifecycle state of a collection share link.
+type ShareLinkStatus string
+
+const (
+	ShareLinkActive  ShareLinkStatus = "active"
+	ShareLinkExpired ShareLinkStatus = "expired"
+	ShareLinkRevoked ShareLinkStatus = "revoked"
+)
+
 // ValidAssetTypes is the set of valid AssetType values.
 var ValidAssetTypes = map[AssetType]bool{
 	AssetTypeImage: true, AssetTypeVector: true, AssetTypeFont: true,

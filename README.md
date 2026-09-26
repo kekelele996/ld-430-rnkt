@@ -35,6 +35,7 @@ go run ./cmd/server
 - 素材上传与元数据管理：文件存入 MinIO，生成文件 URL 与缩略图 URL，支持 Draft → Published → Archived 状态流转
 - 素材分类管理：多级父子分类，树形结构返回
 - 素材集/收藏夹：创建收藏夹、添加/移除素材、设置公开、协作成员共同维护
+- 收藏夹分享链接：所有者创建带过期时间的分享链接并可随时撤回，外部访客免登录凭链接查看；公开结果仅返回已发布素材（草稿/下架素材的标题、文件地址、缩略图一律不返回），过期或撤回后访问返回 403，数据库只存链接 token 的 SHA-256 指纹
 - 素材搜索与筛选：标题/描述/标签/类型/许可/状态组合筛选，分页与下载量/浏览量排序
 - 下载记录与统计：每次下载留痕，统计下载/浏览次数，热度排行
 - 标签管理：分类标签、使用次数统计、标签云
@@ -96,6 +97,10 @@ go run ./cmd/server
 | POST | /collections/:id/assets | 收藏夹添加素材 |
 | DELETE | /collections/:id/assets/:assetId | 收藏夹移除素材 |
 | POST | /collections/:id/members | 添加协作成员 |
+| POST | /collections/:id/share-links | 创建分享链接（所有者，body：`{"expires_in_hours": 72}`，原始 token 仅返回一次） |
+| GET | /collections/:id/share-links | 分享链接列表（所有者，含 active/expired/revoked 状态） |
+| DELETE | /collections/:id/share-links/:linkId | 撤回分享链接（所有者） |
+| GET | /shared/:token | 访客免登录查看分享的收藏夹（仅已发布素材；过期/撤回返回 403） |
 | GET | /downloads | 下载记录 |
 | GET | /audit-logs | 审计日志（Admin） |
 

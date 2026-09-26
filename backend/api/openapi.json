@@ -22,6 +22,41 @@
     "/collections/{id}/assets": { "post": { "summary": "添加素材", "tags": ["collection"] } },
     "/collections/{id}/assets/{assetId}": { "delete": { "summary": "移除素材", "tags": ["collection"] } },
     "/collections/{id}/members": { "post": { "summary": "添加协作成员", "tags": ["collection"] } },
+    "/collections/{id}/share-links": {
+      "post": {
+        "summary": "创建收藏夹分享链接（所有者，带过期时间，原始 token 仅返回一次）",
+        "tags": ["share"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["expires_in_hours"],
+                "properties": {
+                  "expires_in_hours": { "type": "integer", "minimum": 1, "maximum": 8760, "example": 72 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "创建成功，data.token 为原始分享 token（仅此一次返回）" }, "403": { "description": "非收藏夹所有者" } }
+      },
+      "get": { "summary": "列出收藏夹分享链接（所有者，不含原始 token）", "tags": ["share"], "responses": { "200": { "description": "分享链接列表，status 为 active/expired/revoked" } } }
+    },
+    "/collections/{id}/share-links/{linkId}": { "delete": { "summary": "撤回分享链接（所有者，撤回后访问返回 403）", "tags": ["share"], "responses": { "200": { "description": "撤回成功" }, "403": { "description": "非收藏夹所有者" }, "404": { "description": "链接不存在" } } } },
+    "/shared/{token}": {
+      "get": {
+        "summary": "访客免登录查看分享的收藏夹（仅返回已发布素材；过期/撤回返回 403）",
+        "tags": ["share"],
+        "parameters": [{ "name": "token", "in": "path", "required": true, "schema": { "type": "string" }, "description": "分享 token（数据库仅存其 SHA-256 指纹）" }],
+        "responses": {
+          "200": { "description": "收藏夹公开视图，assets 仅包含 Published 素材" },
+          "403": { "description": "链接已过期或已撤回" },
+          "404": { "description": "链接不存在" }
+        }
+      }
+    },
     "/downloads": { "get": { "summary": "下载记录", "tags": ["download"] } },
     "/audit-logs": { "get": { "summary": "审计日志 (Admin)", "tags": ["audit"] } }
   },

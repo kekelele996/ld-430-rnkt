@@ -70,6 +70,7 @@ func run(cfg *config.Config, logger *slog.Logger) error {
 	assetRepo := repository.NewAssetRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	collectionRepo := repository.NewCollectionRepository(db)
+	shareLinkRepo := repository.NewShareLinkRepository(db)
 	downloadRepo := repository.NewDownloadRecordRepository(db)
 	tagRepo := repository.NewTagRepository(db)
 	reviewRepo := repository.NewReviewRecordRepository(db)
@@ -83,6 +84,7 @@ func run(cfg *config.Config, logger *slog.Logger) error {
 	assetService := service.NewAssetService(assetRepo, tagRepo, categoryRepo, storageService, searchService, logger)
 	categoryService := service.NewCategoryService(categoryRepo, logger)
 	collectionService := service.NewCollectionService(collectionRepo, logger)
+	shareService := service.NewShareService(shareLinkRepo, collectionRepo, assetRepo, logger)
 	downloadService := service.NewDownloadService(downloadRepo, assetRepo, logger)
 	tagService := service.NewTagService(tagRepo, logger)
 	reviewService := service.NewReviewService(reviewRepo, assetRepo, logger)
@@ -96,6 +98,7 @@ func run(cfg *config.Config, logger *slog.Logger) error {
 		Asset:      handler.NewAssetHandler(assetService),
 		Category:   handler.NewCategoryHandler(categoryService),
 		Collection: handler.NewCollectionHandler(collectionService),
+		Share:      handler.NewShareHandler(shareService),
 		Download:   handler.NewDownloadHandler(downloadService),
 		Tag:        handler.NewTagHandler(tagService),
 		Review:     handler.NewReviewHandler(reviewService),

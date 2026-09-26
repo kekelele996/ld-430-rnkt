@@ -76,6 +76,25 @@ func (r *AssetRepository) List(ctx context.Context, filter bson.M, sort bson.D, 
 	return assets, nil
 }
 
+// ListByIDsAndStatus returns assets matching the given ids and status.
+// Used by public sharing so non-matching assets never leave the database layer.
+func (r *AssetRepository) ListByIDsAndStatus(ctx context.Context, ids []primitive.ObjectID, status string) ([]model.Asset, error) {
+	if len(ids) == 0 {
+		return []model.Asset{}, nil
+	}
+	filter := bson.M{"_id": bson.M{"$in": ids}, "status": status}
+	cursor, err := r.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("list assets by ids and status: %w", err)
+	}
+	defer cursor.Close(ctx)
+	var assets []model.Asset
+	if err := cursor.All(ctx, &assets); err != nil {
+		return nil, fmt.Errorf("decode assets: %w", err)
+	}
+	return assets, nil
+}
+
 // Count returns the number of assets matching the filter.
 func (r *AssetRepository) Count(ctx context.Context, filter bson.M) (int64, error) {
 	n, err := r.coll.CountDocuments(ctx, filter)
