@@ -1,0 +1,90 @@
+name: assethub
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: ${COMPOSE_PROJECT_NAME:-assethub}-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-33330}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-asset_library}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-assethub}-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-36310}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  minio:
+    image: minio/minio:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-assethub}-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?set MINIO_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?set MINIO_SECRET_KEY in .env}
+    ports:
+      - "${MINIO_API_PORT:-39010}:9000"
+      - "${MINIO_CONSOLE_PORT:-39011}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: ${COMPOSE_PROJECT_NAME:-assethub}-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-19310}:8080"
+    environment:
+      APP_ENV: production
+      SERVER_PORT: 8080
+      MONGO_URI: mongodb://mongodb:27017/${MONGO_DATABASE:-asset_library}
+      MONGO_DATABASE: ${MONGO_DATABASE:-asset_library}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?set MINIO_ACCESS_KEY in .env}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?set MINIO_SECRET_KEY in .env}
+      MINIO_BUCKET: ${MINIO_BUCKET:-assethub}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:19310}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@assethub.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-AssethubAdmin2026}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mongo_data:
+  redis_data:
+  minio_data:

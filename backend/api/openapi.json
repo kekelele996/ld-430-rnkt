@@ -1,0 +1,29 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Asset Library API", "version": "1.0.0", "description": "数字素材库与共享 API 服务" },
+  "servers": [{ "url": "/api/v1" }],
+  "paths": {
+    "/auth/register": { "post": { "summary": "注册", "tags": ["auth"] } },
+    "/auth/login": { "post": { "summary": "登录获取 JWT", "tags": ["auth"] } },
+    "/auth/me": { "get": { "summary": "当前用户", "tags": ["auth"] } },
+    "/assets/upload": { "post": { "summary": "上传素材 (20次/小时/IP)", "tags": ["asset"] } },
+    "/assets": { "get": { "summary": "素材搜索与筛选", "tags": ["asset"] } },
+    "/assets/hot": { "get": { "summary": "热度排行", "tags": ["asset"] } },
+    "/assets/{id}": { "get": { "summary": "素材详情", "tags": ["asset"] }, "put": { "summary": "编辑素材", "tags": ["asset"] } },
+    "/assets/{id}/publish": { "post": { "summary": "发布", "tags": ["asset"] } },
+    "/assets/{id}/archive": { "post": { "summary": "下架", "tags": ["asset"] } },
+    "/assets/{id}/download": { "post": { "summary": "下载 (10次/分钟/IP)", "tags": ["download"] } },
+    "/assets/{id}/reviews": { "get": { "summary": "审核记录", "tags": ["review"] }, "post": { "summary": "提交审核 (Moderator/Admin)", "tags": ["review"] } },
+    "/categories": { "get": { "summary": "分类树", "tags": ["category"] }, "post": { "summary": "创建分类 (Moderator/Admin)", "tags": ["category"] } },
+    "/categories/{id}": { "put": { "summary": "更新分类", "tags": ["category"] }, "delete": { "summary": "删除分类", "tags": ["category"] } },
+    "/tags": { "get": { "summary": "标签云", "tags": ["tag"] }, "post": { "summary": "创建标签 (Moderator/Admin)", "tags": ["tag"] } },
+    "/collections": { "get": { "summary": "收藏夹列表", "tags": ["collection"] }, "post": { "summary": "创建收藏夹", "tags": ["collection"] } },
+    "/collections/{id}": { "get": { "summary": "收藏夹详情", "tags": ["collection"] }, "put": { "summary": "更新收藏夹", "tags": ["collection"] } },
+    "/collections/{id}/assets": { "post": { "summary": "添加素材", "tags": ["collection"] } },
+    "/collections/{id}/assets/{assetId}": { "delete": { "summary": "移除素材", "tags": ["collection"] } },
+    "/collections/{id}/members": { "post": { "summary": "添加协作成员", "tags": ["collection"] } },
+    "/downloads": { "get": { "summary": "下载记录", "tags": ["download"] } },
+    "/audit-logs": { "get": { "summary": "审计日志 (Admin)", "tags": ["audit"] } }
+  },
+  "components": { "securitySchemes": { "BearerAuth": { "type": "http", "scheme": "bearer" } } }
+}
